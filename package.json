@@ -19,6 +19,7 @@
     "@prismicio/types": "^0.1.27",
     "date-fns": "^2.19.0",
     "next": "12.2.3",
+    "phosphor-react": "^1.4.1",
     "prismic-dom": "^2.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
