@@ -6,6 +6,7 @@ import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+import Header from '../components/Header';
 
 interface Post {
   uid?: string;
@@ -60,11 +61,7 @@ export default function Home() {
         <title>Home | spacetreveling</title>
       </Head>
 
-      <main className={styles.container}>
-        <header>
-          <img src="/logo.svg" alt="" />
-        </header>
-
+      <main>
         <div className={styles.contentPosts}>
           {listArticles.map(article => (
             <article key={article.id}>
