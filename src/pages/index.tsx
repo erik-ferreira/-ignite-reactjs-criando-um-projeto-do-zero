@@ -1,13 +1,16 @@
 import Head from 'next/head';
+import Link from 'next/link';
 import { GetStaticProps } from 'next';
 import { CalendarBlank, User } from 'phosphor-react';
 
 import { getPrismicClient } from '../services/prismic';
 
-import commonStyles from '../styles/common.module.scss';
-import styles from './home.module.scss';
 import Header from '../components/Header';
-import Link from 'next/link';
+
+import { formatDate } from '../utils/masks';
+
+import styles from './home.module.scss';
+import commonStyles from '../styles/common.module.scss';
 
 interface Post {
   uid?: string;
@@ -28,34 +31,7 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home() {
-  // TODO
-
-  const listArticles = [
-    {
-      id: 1,
-      title: 'Como utilizar Hooks',
-      description: 'Pensando em sincronização em vez de ciclos de vida.',
-      date: '15 Mar 2021',
-      author: 'Joseph Oliveira',
-    },
-    {
-      id: 2,
-      title: 'Criando um app CRA do zero',
-      description:
-        'Tudo sobre como criar a sua primeira aplicação utilizando Create React App',
-      date: '19 Abr 2021',
-      author: 'Danilo Vieira',
-    },
-    {
-      id: 3,
-      title: 'Como utilizar Hooks',
-      description: 'Pensando em sincronização em vez de ciclos de vida.',
-      date: '15 Mar 2021',
-      author: 'Joseph Oliveira',
-    },
-  ];
-
+export default function Home({ postsPagination }: HomeProps) {
   return (
     <>
       <Head>
@@ -64,20 +40,20 @@ export default function Home() {
 
       <main>
         <div className={styles.contentPosts}>
-          {listArticles.map(article => (
-            <Link href="/post/lkansdlaknda" key={article.id}>
+          {postsPagination?.results?.map(article => (
+            <Link href={`/post/${article.uid}`} key={article.uid}>
               <a>
-                <strong>{article.title}</strong>
-                <span>{article.description}</span>
+                <strong>{article.data.title}</strong>
+                <span>{article.data.subtitle}</span>
 
                 <div className={styles.footerCard}>
                   <div>
                     <CalendarBlank size={20} color="#BBB" />
-                    <span>{article.date}</span>
+                    <span>{article.first_publication_date}</span>
                   </div>
                   <div>
                     <User size={20} color="#BBB" />
-                    <span>{article.author}</span>
+                    <span>{article.data.author}</span>
                   </div>
                 </div>
               </a>
@@ -93,9 +69,28 @@ export default function Home() {
   );
 }
 
-// export const getStaticProps = async () => {
-//   // const prismic = getPrismicClient({});
-//   // const postsResponse = await prismic.getByType(TODO);
+export const getStaticProps: GetStaticProps = async () => {
+  const prismic = getPrismicClient();
+  const response = await prismic.getByType('posts', { pageSize: 1 });
 
-//   // TODO
-// };
+  const posts: Post[] = response.results.map(post => {
+    return {
+      uid: post.uid,
+      first_publication_date: formatDate(post.first_publication_date),
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
+      },
+    };
+  });
+
+  return {
+    props: {
+      postsPagination: {
+        next_page: response.next_page,
+        results: posts,
+      },
+    },
+  };
+};
