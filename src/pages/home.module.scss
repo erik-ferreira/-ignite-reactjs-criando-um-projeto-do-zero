@@ -4,7 +4,7 @@
   max-width: 1120px;
   margin: 0 auto;
 
-  article {
+  a {
     strong {
       display: block;
       font-size: 1.75rem;
@@ -20,7 +20,7 @@
       color: var(--gray-100);
     }
 
-    .footerArticle {
+    .footerCard {
       display: flex;
       gap: 1.5rem;
       margin-top: 1.5rem;
@@ -33,12 +33,14 @@
         span {
           font-size: 0.875rem;
           line-height: 1rem;
+          color: var(--gray-200);
         }
       }
     }
   }
 
-  article + article {
+  a + a {
+    display: block;
     margin-top: 3rem;
   }
 }

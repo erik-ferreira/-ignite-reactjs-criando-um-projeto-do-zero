@@ -7,6 +7,7 @@ import { getPrismicClient } from '../services/prismic';
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 import Header from '../components/Header';
+import Link from 'next/link';
 
 interface Post {
   uid?: string;
@@ -64,21 +65,23 @@ export default function Home() {
       <main>
         <div className={styles.contentPosts}>
           {listArticles.map(article => (
-            <article key={article.id}>
-              <strong>{article.title}</strong>
-              <span>{article.description}</span>
+            <Link href="/post/lkansdlaknda" key={article.id}>
+              <a>
+                <strong>{article.title}</strong>
+                <span>{article.description}</span>
 
-              <div className={styles.footerArticle}>
-                <div>
-                  <CalendarBlank size={20} />
-                  <span>{article.date}</span>
+                <div className={styles.footerCard}>
+                  <div>
+                    <CalendarBlank size={20} color="#BBB" />
+                    <span>{article.date}</span>
+                  </div>
+                  <div>
+                    <User size={20} color="#BBB" />
+                    <span>{article.author}</span>
+                  </div>
                 </div>
-                <div>
-                  <User size={20} />
-                  <span>{article.author}</span>
-                </div>
-              </div>
-            </article>
+              </a>
+            </Link>
           ))}
 
           <button type="button" className={styles.buttonLoadMorePosts}>

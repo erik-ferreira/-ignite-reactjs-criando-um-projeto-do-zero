@@ -1,1 +1,61 @@
-// TODO
+.containerPost {
+  img {
+    width: 100%;
+    height: 25rem;
+  }
+
+  > div {
+    max-width: 1120px;
+    margin: 0 auto;
+    margin-top: 5rem;
+
+    h1 {
+      color: var(--gray-50);
+      font-weight: 700;
+      font-size: 3rem;
+      line-height: 3.625rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: row;
+      gap: 1.5rem;
+
+      > div {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        span {
+          font-size: 1rem;
+          line-height: 1.25rem;
+          color: var(--gray-200);
+        }
+      }
+    }
+  }
+}
+
+.content {
+  margin-top: 4rem;
+
+  section {
+    h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.5rem;
+      margin-bottom: 3.875rem;
+    }
+
+    p {
+      font-size: 1.125rem;
+      line-height: 1.5rem;
+      margin-bottom: 2rem;
+    }
+  }
+
+  section + section {
+    margin-top: 6rem;
+  }
+}
