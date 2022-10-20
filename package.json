@@ -16,7 +16,7 @@
     "@prismicio/next": "^0.1.2",
     "@prismicio/react": "^2.5.0",
     "@prismicio/slice-simulator-react": "^0.2.2",
-    "@prismicio/types": "^0.1.27",
+    "@prismicio/types": "^0.2.3",
     "date-fns": "^2.19.0",
     "next": "12.2.3",
     "phosphor-react": "^1.4.1",
@@ -50,7 +50,7 @@
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
     "sass": "^1.32.8",
-    "slice-machine-ui": "^0.5.0",
+    "slice-machine-ui": "^0.5.1",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.2"
   }
