@@ -1,6 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import { RichText } from 'prismic-dom';
+import { useRouter } from 'next/router';
 import { CalendarBlank, User, Clock } from 'phosphor-react';
 
 import { getPrismicClient } from '../../services/prismic';
@@ -32,6 +33,8 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+  const { isFallback } = useRouter();
+
   // Reading timing
   const numberWordsInHeading = post?.data?.content?.reduce(
     (acumulator, currentValue) => {
@@ -55,17 +58,21 @@ export default function Post({ post }: PostProps) {
   const numberOfWordsReadPerMinute = 200;
   const readingTime = Math.ceil(numberTotalWords / numberOfWordsReadPerMinute);
 
+  if (isFallback) {
+    return <h1>Carregando...</h1>;
+  }
+
   return (
     <>
       <Head>
-        <title>Criando um app CRA do zero | spacetreveling</title>
+        <title>{post?.data?.title} | spacetreveling</title>
       </Head>
 
       <main className={styles.containerPost}>
         <img src={post?.data?.banner?.url} alt="" />
 
         <div>
-          <h1>Criando um app CRA do zero</h1>
+          <h1>{post?.data?.title}</h1>
 
           <div className={styles.info}>
             <div>
@@ -101,12 +108,14 @@ export default function Post({ post }: PostProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // const prismic = getPrismicClient({});
-  // const posts = await prismic.getByType(TODO);
+  const prismic = getPrismicClient();
+  const posts = await prismic.getByType('posts', { pageSize: 5 });
+
+  const paths = posts.results.map(post => ({ params: { slug: post.id } }));
 
   // TODO
   return {
-    paths: [],
+    paths: paths,
     fallback: true,
   };
 };
