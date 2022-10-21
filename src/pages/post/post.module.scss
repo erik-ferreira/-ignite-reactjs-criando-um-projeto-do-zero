@@ -48,10 +48,19 @@
       margin-bottom: 3.875rem;
     }
 
-    p {
-      font-size: 1.125rem;
-      line-height: 1.5rem;
-      margin-bottom: 2rem;
+    > div {
+      p {
+        font-size: 1.125rem;
+        line-height: 1.5rem;
+      }
+
+      a {
+        color: var(--pink-200);
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
   }
 

@@ -33,7 +33,7 @@ interface PostProps {
 
 export default function Post({ post }: PostProps) {
   // Reading timing
-  const numberWordsInHeading = post.data.content.reduce(
+  const numberWordsInHeading = post?.data?.content?.reduce(
     (acumulator, currentValue) => {
       const formatLength = currentValue.heading.split(' ').length;
 
@@ -42,7 +42,7 @@ export default function Post({ post }: PostProps) {
     0
   );
 
-  const numberWordsInBody = post.data.content.reduce(
+  const numberWordsInBody = post?.data?.content?.reduce(
     (acumulator, currentValue) => {
       const formatLength = RichText.asText(currentValue.body).split(' ').length;
 
@@ -62,7 +62,7 @@ export default function Post({ post }: PostProps) {
       </Head>
 
       <main className={styles.containerPost}>
-        <img src={post.data.banner.url} alt="" />
+        <img src={post?.data?.banner?.url} alt="" />
 
         <div>
           <h1>Criando um app CRA do zero</h1>
@@ -70,11 +70,11 @@ export default function Post({ post }: PostProps) {
           <div className={styles.info}>
             <div>
               <CalendarBlank size={20} color="#BBB" />
-              <span>{post.first_publication_date}</span>
+              <span>{post?.first_publication_date}</span>
             </div>
             <div>
               <User size={20} color="#BBB" />
-              <span>{post.data.author}</span>
+              <span>{post?.data?.author}</span>
             </div>
             <div>
               <Clock size={20} color="#BBB" />
@@ -83,7 +83,7 @@ export default function Post({ post }: PostProps) {
           </div>
 
           <div className={styles.content}>
-            {post.data.content.map(content => (
+            {post?.data?.content?.map(content => (
               <section key={content.heading}>
                 <h2>{content.heading}</h2>
                 <div
