@@ -1,16 +1,15 @@
+import { useState } from 'react';
+import axios from 'axios';
 import Head from 'next/head';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
+import { toast } from 'react-toastify';
 import { CalendarBlank, User } from 'phosphor-react';
 
 import { getPrismicClient } from '../services/prismic';
-
-import Header from '../components/Header';
-
 import { formatDate } from '../utils/masks';
 
 import styles from './home.module.scss';
-import commonStyles from '../styles/common.module.scss';
 
 interface Post {
   uid?: string;
@@ -32,6 +31,34 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
+  const [posts, setPosts] = useState<Post[]>(postsPagination.results);
+  const [nextPage, setNextPage] = useState<string | null>(
+    postsPagination.next_page
+  );
+
+  async function handleLoadMorePosts() {
+    try {
+      const response = await axios.get<PostPagination>(nextPage);
+
+      if (response.status === 200) {
+        const updatedPosts: Post[] = response.data.results.map(post => ({
+          uid: post.uid,
+          first_publication_date: post.first_publication_date,
+          data: {
+            title: post.data.title,
+            author: post.data.author,
+            subtitle: post.data.subtitle,
+          },
+        }));
+
+        setPosts(prevState => [...prevState, ...updatedPosts]);
+        setNextPage(response.data.next_page);
+      }
+    } catch (err) {
+      toast.warning('Não foi possível carregar mais posts.');
+    }
+  }
+
   return (
     <>
       <Head>
@@ -40,7 +67,7 @@ export default function Home({ postsPagination }: HomeProps) {
 
       <main>
         <div className={styles.contentPosts}>
-          {postsPagination?.results?.map(article => (
+          {posts?.map(article => (
             <Link href={`/post/${article.uid}`} key={article.uid}>
               <a>
                 <strong>{article.data.title}</strong>
@@ -60,9 +87,15 @@ export default function Home({ postsPagination }: HomeProps) {
             </Link>
           ))}
 
-          <button type="button" className={styles.buttonLoadMorePosts}>
-            Carregar mais posts
-          </button>
+          {nextPage && (
+            <button
+              type="button"
+              className={styles.buttonLoadMorePosts}
+              onClick={handleLoadMorePosts}
+            >
+              Carregar mais posts
+            </button>
+          )}
         </div>
       </main>
     </>
