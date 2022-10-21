@@ -1,8 +1,11 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
+import { RichText } from 'prismic-dom';
 import { CalendarBlank, User, Clock } from 'phosphor-react';
 
 import { getPrismicClient } from '../../services/prismic';
+
+import { formatDate } from '../../utils/masks';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
@@ -28,7 +31,30 @@ interface PostProps {
   post: Post;
 }
 
-export default function Post() {
+export default function Post({ post }: PostProps) {
+  // Reading timing
+  const numberWordsInHeading = post.data.content.reduce(
+    (acumulator, currentValue) => {
+      const formatLength = currentValue.heading.split(' ').length;
+
+      return formatLength + acumulator;
+    },
+    0
+  );
+
+  const numberWordsInBody = post.data.content.reduce(
+    (acumulator, currentValue) => {
+      const formatLength = RichText.asText(currentValue.body).split(' ').length;
+
+      return formatLength + acumulator;
+    },
+    0
+  );
+
+  const numberTotalWords = numberWordsInHeading + numberWordsInBody;
+  const numberOfWordsReadPerMinute = 200;
+  const readingTime = Math.ceil(numberTotalWords / numberOfWordsReadPerMinute);
+
   return (
     <>
       <Head>
@@ -36,7 +62,7 @@ export default function Post() {
       </Head>
 
       <main className={styles.containerPost}>
-        <img src="/banner.png" alt="" />
+        <img src={post.data.banner.url} alt="" />
 
         <div>
           <h1>Criando um app CRA do zero</h1>
@@ -44,60 +70,29 @@ export default function Post() {
           <div className={styles.info}>
             <div>
               <CalendarBlank size={20} color="#BBB" />
-              <span>15 Mar 2021</span>
+              <span>{post.first_publication_date}</span>
             </div>
             <div>
               <User size={20} color="#BBB" />
-              <span>Joseph Oliveira</span>
+              <span>{post.data.author}</span>
             </div>
             <div>
               <Clock size={20} color="#BBB" />
-              <span>4 min</span>
+              <span>{readingTime} min</span>
             </div>
           </div>
 
           <div className={styles.content}>
-            <section>
-              <h2>Proin et varius</h2>
-
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-
-              <p>
-                Nullam dolor sapien, vulputate eu diam at, condimentum hendrerit
-                tellus. Nam facilisis sodales felis, pharetra pharetra lectus
-                auctor sed.
-              </p>
-
-              <p>
-                Ut venenatis mauris vel libero pretium, et pretium ligula
-                faucibus. Morbi nibh felis, elementum a posuere et, vulputate et
-                erat. Nam venenatis.
-              </p>
-            </section>
-
-            <section>
-              <h2>Cras laoreet mi</h2>
-
-              <p>
-                Nulla auctor sit amet quam vitae commodo. Sed risus justo,
-                vulputate quis neque eget, dictum sodales sem. In eget felis
-                finibus, mattis magna a, efficitur ex. Curabitur vitae justo
-                consequat sapien gravida auctor a non risus. Sed malesuada
-                mauris nec orci congue, interdum efficitur urna dignissim.
-                Vivamus cursus elit sem, vel facilisis nulla pretium
-                consectetur. Nunc congue.
-              </p>
-              <p>
-                Class aptent taciti sociosqu ad litora torquent per conubia
-                nostra, per inceptos himenaeos. Aliquam consectetur massa nec
-                metus condimentum, sed tincidunt enim tincidunt. Vestibulum
-                fringilla risus sit amet massa suscipit eleifend. Duis eget
-                metus cursus, suscipit ante ac, iaculis est. Donec accumsan enim
-                sit amet lorem placerat, eu dapibus ex porta. Etiam a est in leo
-                pulvinar auctor. Praesent sed vestibulum elit, consectetur
-                egestas libero.
-              </p>
-            </section>
+            {post.data.content.map(content => (
+              <section key={content.heading}>
+                <h2>{content.heading}</h2>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: RichText.asHtml(content.body),
+                  }}
+                />
+              </section>
+            ))}
           </div>
         </div>
       </main>
@@ -105,16 +100,41 @@ export default function Post() {
   );
 }
 
-// export const getStaticPaths = async () => {
-//   const prismic = getPrismicClient({});
-//   const posts = await prismic.getByType(TODO);
+export const getStaticPaths: GetStaticPaths = async () => {
+  // const prismic = getPrismicClient({});
+  // const posts = await prismic.getByType(TODO);
 
-//   // TODO
-// };
+  // TODO
+  return {
+    paths: [],
+    fallback: true,
+  };
+};
 
-// export const getStaticProps = async ({params }) => {
-//   const prismic = getPrismicClient({});
-//   const response = await prismic.getByUID(TODO);
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const { slug } = params;
 
-//   // TODO
-// };
+  const prismic = getPrismicClient();
+  const response = await prismic.getByUID('posts', String(slug));
+
+  // const content = response.data.content as Content[];
+
+  const post: Post = {
+    first_publication_date: formatDate(response.first_publication_date),
+    data: {
+      author: response.data.author,
+      banner: {
+        url: response.data.banner.url,
+      },
+      content: response.data.content,
+      title: response.data.title,
+    },
+  };
+
+  // TODO
+  return {
+    props: {
+      post,
+    },
+  };
+};

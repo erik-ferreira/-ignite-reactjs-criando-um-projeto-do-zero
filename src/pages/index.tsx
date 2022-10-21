@@ -43,7 +43,7 @@ export default function Home({ postsPagination }: HomeProps) {
       if (response.status === 200) {
         const updatedPosts: Post[] = response.data.results.map(post => ({
           uid: post.uid,
-          first_publication_date: post.first_publication_date,
+          first_publication_date: formatDate(post.first_publication_date),
           data: {
             title: post.data.title,
             author: post.data.author,
