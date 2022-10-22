@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+
 import Head from 'next/head';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
@@ -38,22 +38,21 @@ export default function Home({ postsPagination }: HomeProps) {
 
   async function handleLoadMorePosts() {
     try {
-      const response = await axios.get<PostPagination>(nextPage);
+      const response = await fetch(nextPage);
+      const data: PostPagination = await response.json();
 
-      if (response.status === 200) {
-        const updatedPosts: Post[] = response.data.results.map(post => ({
-          uid: post.uid,
-          first_publication_date: formatDate(post.first_publication_date),
-          data: {
-            title: post.data.title,
-            author: post.data.author,
-            subtitle: post.data.subtitle,
-          },
-        }));
+      const updatedPosts: Post[] = data.results.map(post => ({
+        uid: post.uid,
+        first_publication_date: post.first_publication_date,
+        data: {
+          title: post.data.title,
+          author: post.data.author,
+          subtitle: post.data.subtitle,
+        },
+      }));
 
-        setPosts(prevState => [...prevState, ...updatedPosts]);
-        setNextPage(response.data.next_page);
-      }
+      setPosts(prevState => [...prevState, ...updatedPosts]);
+      setNextPage(data.next_page);
     } catch (err) {
       toast.warning('Não foi possível carregar mais posts.');
     }
@@ -76,7 +75,7 @@ export default function Home({ postsPagination }: HomeProps) {
                 <div className={styles.footerCard}>
                   <div>
                     <CalendarBlank size={20} color="#BBB" />
-                    <span>{article.first_publication_date}</span>
+                    <span>{formatDate(article.first_publication_date)}</span>
                   </div>
                   <div>
                     <User size={20} color="#BBB" />
@@ -106,24 +105,9 @@ export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
   const response = await prismic.getByType('posts', { pageSize: 1 });
 
-  const posts: Post[] = response.results.map(post => {
-    return {
-      uid: post.uid,
-      first_publication_date: formatDate(post.first_publication_date),
-      data: {
-        title: post.data.title,
-        subtitle: post.data.subtitle,
-        author: post.data.author,
-      },
-    };
-  });
-
   return {
     props: {
-      postsPagination: {
-        next_page: response.next_page,
-        results: posts,
-      },
+      postsPagination: response,
     },
   };
 };
