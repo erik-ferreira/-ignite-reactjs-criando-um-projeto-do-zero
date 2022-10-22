@@ -12,9 +12,11 @@ import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 
 interface Post {
+  uid: string;
   first_publication_date: string | null;
   data: {
     title: string;
+    subtitle: string;
     banner: {
       url: string;
     };
@@ -77,7 +79,7 @@ export default function Post({ post }: PostProps) {
           <div className={styles.info}>
             <div>
               <CalendarBlank size={20} color="#BBB" />
-              <span>{post?.first_publication_date}</span>
+              <span>{formatDate(post?.first_publication_date)}</span>
             </div>
             <div>
               <User size={20} color="#BBB" />
@@ -111,7 +113,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const prismic = getPrismicClient();
   const posts = await prismic.getByType('posts', { pageSize: 5 });
 
-  const paths = posts.results.map(post => ({ params: { slug: post.id } }));
+  const paths = posts.results.map(post => ({ params: { slug: post?.uid } }));
 
   // TODO
   return {
@@ -126,24 +128,28 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient();
   const response = await prismic.getByUID('posts', String(slug));
 
-  // const content = response.data.content as Content[];
-
-  const post: Post = {
-    first_publication_date: formatDate(response.first_publication_date),
+  const post = {
     data: {
-      author: response.data.author,
+      title: response.data.title,
+      subtitle: response.data.subtitle,
       banner: {
         url: response.data.banner.url,
       },
-      content: response.data.content,
-      title: response.data.title,
+      author: response.data.author,
+      content: response.data.content.map(content => ({
+        heading: content.heading,
+        body: content.body,
+      })),
     },
-  };
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
+  } as Post;
 
   // TODO
   return {
     props: {
-      post,
+      post: post,
     },
+    revalidate: 60 * 60 * 24, // 1 day
   };
 };
